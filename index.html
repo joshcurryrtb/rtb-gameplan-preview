@@ -115,6 +115,7 @@
 
   <div class="card" id="form">
     <div class="q"><div class="ql">Your Name</div><input type="text" id="f-name" placeholder="First name is fine"></div>
+    <div class="q"><div class="ql">Your Email <span class="opt">(the one you signed up with — it links your TrainHeroic program)</span></div><input type="text" id="f-email" placeholder="you@email.com" inputmode="email"></div>
     <div class="q"><div class="ql">Your Gym</div><div class="chips" data-group="location" data-single>
       <span class="chip">Windsor</span><span class="chip">Chelsea Heights</span></div></div>
     <div class="q"><div class="ql">Main Goal</div><div class="chips" data-group="goal" data-single>
@@ -153,7 +154,7 @@
     <div class="q"><div class="ql">Preferred Class Times <span class="opt">(pick as many as you like)</span></div><div class="chips" data-group="time" id="time-chips">
       <span style="color:#999;font-size:13px;padding:6px 0;">Choose your gym first</span></div></div>
     <button class="submit" onclick="build()">Build My Gameplan →</button>
-    <div class="err" id="err">Add your name, gym, goal, sessions per week and experience so we can build your plan.</div>
+    <div class="err" id="err">Add your name, a valid email, gym, goal, sessions per week and experience so we can build your plan.</div>
   </div>
 
   <div id="plan"></div>
@@ -227,6 +228,7 @@ const EXP_LINES={
 
 function build(){
   const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim();
   const loc=pick('location'), goal=pick('goal'), sess=pick('sessions'), exp=pick('exp');
   const times=picks('time');
   const lifts=picks('lifts').filter(l=>l!=='Not sure yet');
@@ -235,7 +237,7 @@ function build(){
   const win=document.getElementById('f-win').value.trim();
   const obstacle=pick('obstacle');
   const nut=pick('nut');
-  if(!name||!loc||!goal||!sess||!exp){document.getElementById('err').style.display='block';return;}
+  if(!name||!/^\S+@\S+\.\S+$/.test(email)||!loc||!goal||!sess||!exp){document.getElementById('err').style.display='block';return;}
   document.getElementById('err').style.display='none';
   const first=name.split(' ')[0];
   const beginner=exp==='never';
