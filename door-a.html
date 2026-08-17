@@ -56,9 +56,14 @@
   .doc-head .logo-img { height:24px; mix-blend-mode:screen; }
 
   /* program cards */
-  .pgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:10px; margin-top:4px; }
+  .pgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:4px; }
   .pcard { border:1.5px solid #000; background:#fff; padding:0 0 10px; break-inside:avoid; }
   .pcard.rec { box-shadow:0 0 0 2px #000; }
+  .pcard.flex { border-style:dashed; grid-column:1 / -1; }
+  .pcard.flex .ps-secs { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0 8px; }
+  .pcard.flex .pc-head { background:#fff; color:#000; border-bottom:1.5px dashed #000; }
+  .pcard.flex .pc-lift { color:#666; }
+  .pcard.flex .pc-you { background:#000; color:#fff; }
   .pc-head { display:flex; align-items:baseline; gap:8px; background:#0d0d0d; color:#fff; padding:10px 12px; margin-bottom:8px; }
   .pc-day { font-family:'Anton',sans-serif; text-transform:uppercase; font-size:16px; letter-spacing:.5px; }
   .pc-lift { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#aaa; }
@@ -130,7 +135,12 @@
   .doc.pdf .coach-strip .avatar { width:56px; height:56px; font-size:24px; }
   .doc.pdf .coach-strip .cn { font-size:21px; }
   .doc.pdf .coach-strip p { font-size:15px; }
-  .doc.pdf .pgrid { gap:14px; }
+  .doc.pdf .pgrid.prows { display:block; }
+  .doc.pdf .prow { display:flex; gap:14px; margin-bottom:14px; break-inside:avoid; page-break-inside:avoid; }
+  .doc.pdf .prow .pcard { flex:1 1 0; min-width:0; }
+  .doc.pdf .prow .pcard:only-child { max-width:calc(50% - 7px); }
+  .doc.pdf .prow .pcard.flex:only-child { max-width:none; }   /* Friday spans the row, tri-sets as three columns */
+  .doc.pdf .pcard.flex .ps-secs { grid-template-columns:repeat(3,1fr); }
   .doc.pdf .pc-day { font-size:19px; }
   .doc.pdf .pc-lift { font-size:12px; }
   .doc.pdf .ps-h { font-size:11px; padding:8px 14px 3px; }
@@ -298,20 +308,67 @@ const SCHEDULE=[['MON','Bench'],['TUE','Deadlift'],['WED','Incline Bench'],['THU
 const PROGRAM={
   title:'August 2026 — Cluster Month',
   intro:'August is built around <b>cluster sets</b> — short bursts of heavy, crisp reps with mini-rests in between, so you lift more total weight with better form. Every session below is written and waiting for you in TrainHeroic.',
+  // Friday is the same tri-set finisher session for both tracks — shown as the optional catch-up day.
   female:{
     MON:[
-      {h:'Warm up',        ex:[['A','Bench Press','8, 5, 3 @ –, 50, 60%']]},
-      {h:'Cluster sets',   ex:[['B','Bench Press','4 × 3 @ 75%']]},
+      {h:'Warm up',         ex:[['A','Bench Press','8, 5, 3 @ –, 50, 60%']]},
+      {h:'Cluster sets',    ex:[['B','Bench Press','4 × 3 @ 75%']]},
       {h:'Strength / power',ex:[['C','Front Squat','3 × 7 @ 80%']]},
       {h:'Strength / power',ex:[['D1','Bulgarian Split Squat','2 × 7 @ 80%'],['D2','Seated Cable Row','2 × 10 @ 80%'],['D3','Side Plank + Hip Abduction','2 × 45 s']]}
+    ],
+    TUE:[
+      {h:'Warm up',         ex:[['A','Deadlift','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Deadlift','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Barbell Overhead Press','3 × 7 @ 80%']]},
+      {h:'Strength / power',ex:[['D1','Unilateral Leg Press','2 × 7 @ 80%'],['D2','1-Arm DB Row','2 × 10 @ 75%'],['D3','V-Ups','2 × 15']]}
+    ],
+    WED:[
+      {h:'Warm up',         ex:[['A','Incline Bench Press','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Incline Bench Press','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Romanian Deadlift','3 × 7 @ 80%']]},
+      {h:'Strength / power',ex:[['D1','Pendulum Squat','2 × 7 @ 80%'],['D2','Tricep Pushdown','2 × 10'],['D3','Hanging Knee Raise','2 × 15']]}
+    ],
+    THU:[
+      {h:'Warm up',         ex:[['A','Back Squat','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Back Squat','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Chin-Up','3 × 7']]},
+      {h:'Strength / power',ex:[['D1','Hip Thrust','3 × 7 @ 80%'],['D2','Standing Arnold Press','3 × 10 @ 75%'],['D3','Side Plank + Banded Row','3 × 15']]}
+    ],
+    FRI:[
+      {h:'Tri-set 1',ex:[['A1','Bent Over Row','3 × MAX @ 75%'],['A2','Push-Up','3 × MAX'],['A3','Jack Knife','3 × 15 @ 5 kg']]},
+      {h:'Tri-set 2',ex:[['B1','Leg Extension','3 × 8'],['B2','Single Leg RDL','3 × 8'],['B3','Copenhagen Plank','3 × 30 s']]},
+      {h:'Tri-set 3',ex:[['C1','Barbell Bicep Curl','3 × 21'],['C2','Cable Overhead Tri Ext','3 × MAX'],['C3','Barbell Upright Row','3 × MAX @ 75%']]}
     ]
   },
   male:{
     MON:[
-      {h:'Warm up',        ex:[['A','Bench Press','8, 5, 3 @ –, 65, 75%']]},
-      {h:'Cluster sets',   ex:[['B','Bench Press','4 × 3 @ 85%']]},
+      {h:'Warm up',         ex:[['A','Bench Press','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Bench Press','4 × 3 @ 85%']]},
       {h:'Strength / power',ex:[['C','Front Squat','3 × 7 @ 80%']]},
       {h:'Strength / power',ex:[['D1','1-Arm DB Row','2 × 7 @ 80%'],['D2','Lying Leg Curl','2 × 10 @ 75%'],['D3','Tricep Pushdown','2 × 15 @ 65%']]}
+    ],
+    TUE:[
+      {h:'Warm up',         ex:[['A','Deadlift','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Deadlift','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Barbell Overhead Press','3 × 7 @ 80%']]},
+      {h:'Strength / power',ex:[['D1','Pendulum Squat','2 × 7 @ 80%'],['D2','Cable Facepull','2 × 10 @ 75%'],['D3','V-Ups','2 × 15']]}
+    ],
+    WED:[
+      {h:'Warm up',         ex:[['A','Incline Bench Press','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Incline Bench Press','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Romanian Deadlift','3 × 7 @ 80%']]},
+      {h:'Strength / power',ex:[['D1','Dips','2 × 10'],['D2','DB Bicep Curls','2 × 10'],['D3','DB Lateral Raise','2 × 15']]}
+    ],
+    THU:[
+      {h:'Warm up',         ex:[['A','Back Squat','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',    ex:[['B','Back Squat','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Chin-Up','3 × 7']]},
+      {h:'Strength / power',ex:[['D1','Bulgarian Split Squat','2 × 7 @ 80%'],['D2','DB Incline Fly','2 × 10 @ 75%'],['D3','Side Plank + Banded Row','2 × 15']]}
+    ],
+    FRI:[
+      {h:'Tri-set 1',ex:[['A1','Bent Over Row','3 × MAX @ 75%'],['A2','Push-Up','3 × MAX'],['A3','Jack Knife','3 × 15 @ 5 kg']]},
+      {h:'Tri-set 2',ex:[['B1','Leg Extension','3 × 8'],['B2','Single Leg RDL','3 × 8'],['B3','Copenhagen Plank','3 × 30 s']]},
+      {h:'Tri-set 3',ex:[['C1','Barbell Bicep Curl','3 × 21'],['C2','Cable Overhead Tri Ext','3 × MAX'],['C3','Barbell Upright Row','3 × MAX @ 75%']]}
     ]
   }
 };
@@ -424,7 +481,7 @@ function build(){
   else if(!fill.length) why=`You picked <b>${list(lifts).toLowerCase()}</b> at <b>${sessTxt} sessions a week</b> — ${names(rec)} ${rec.length>1?'are':'is'} exactly ${rec.length>1?'those days':'that day'} on the RTB program.`;
   else why=`You picked <b>${list(lifts).toLowerCase()}</b> — ${names(inPlanMatched)} ${inPlanMatched.length>1?'are':'is'} your focus-lift ${inPlanMatched.length>1?'days':'day'} on the RTB program, and we've added <b>${names(fill)}</b> to round out your ${sessTxt} sessions a week.`;
   if(times.length) why+=` Book the <b>${times.join(' / ')}</b> ${times.length>1?'classes':'class'} you preferred.`;
-  const flexWhy=`<p class="why"><b>Friday is your catch-up day.</b> Miss a session during the week and you make it up here — or if you just want one more, come in and repeat whichever lift you want. It's optional and it's yours to choose${n>=4?', on top of your four days':''}.</p>`;
+  const flexWhy=`<p class="why"><b>Friday is your catch-up day.</b> Miss a session during the week and you make it up here — or if you're up to date, there's a Friday tri-set session waiting in the app. It's optional and it's yours to choose${n>=4?', on top of your four days':''}.</p>`;
 
   let bnum=1; const B=()=>String(bnum++).padStart(2,'0');
   let blocks='';
@@ -471,15 +528,17 @@ function build(){
     const track = (g==='Male'&&has('male'))?'male' : has('female')?'female' : has('male')?'male' : null;
     if(track){
       const days=PROGRAM[track];
-      const cards=SCHEDULE.filter(([d])=>days[d]).map(([d,l])=>{
-        const secs=days[d].map(s=>`<div class="ps-h">${s.h}</div>`+s.ex.map(([t,e,r])=>`<div class="ps-row"><span class="ps-tag">${t}</span><span class="ps-ex">${e}<small>${r}</small></span></div>`).join('')).join('');
-        return `<div class="pcard${rec.includes(d)?' rec':''}"><div class="pc-head"><span class="pc-day">${dayNames[d]}</span><span class="pc-lift">${l}</span>${rec.includes(d)?'<span class="pc-you">Your day</span>':''}</div>${secs}</div>`;
-      }).join('');
+      const secsOf=d=>`<div class="ps-secs">`+days[d].map(s=>`<div class="ps-sec"><div class="ps-h">${s.h}</div>`+s.ex.map(([t,e,r])=>`<div class="ps-row"><span class="ps-tag">${t}</span><span class="ps-ex">${e}<small>${r}</small></span></div>`).join('')+`</div>`).join('')+`</div>`;
+      const cards=SCHEDULE.filter(([d])=>days[d]).map(([d,l])=>
+        `<div class="pcard${rec.includes(d)?' rec':''}"><div class="pc-head"><span class="pc-day">${dayNames[d]}</span><span class="pc-lift">${l}</span>${rec.includes(d)?'<span class="pc-you">Your day</span>':''}</div>${secsOf(d)}</div>`
+      ).join('');
+      // Friday: the tri-set finisher session — optional, same for everyone, never tagged as "your day"
+      const fri=days.FRI?`<div class="pcard flex"><div class="pc-head"><span class="pc-day">Friday</span><span class="pc-lift">Catch-up · Tri-sets</span><span class="pc-you">Optional</span></div>${secsOf('FRI')}</div>`:'';
       const missing=SCHEDULE.filter(([d])=>!days[d]).map(([d])=>dayNames[d]);
       blocks+=`<div class="doc-block"><div class="bnum">${B()}</div><div class="bt">This month's program — ${PROGRAM.title}</div>
         ${PROGRAM.intro?`<p class="why" style="margin-top:0;">${PROGRAM.intro}</p>`:''}
-        <div class="pgrid">${cards}</div>
-        <p class="why">Percentages are of <b>your</b> Working Max — TrainHeroic turns them into the exact weight for you. ${missing.length?`${list(missing)} ${missing.length>1?'sessions are':'session is'} in the app too.`:''} New program every month.</p></div>`;
+        <div class="pgrid">${cards}${fri}</div>
+        <p class="why">Percentages are of <b>your</b> Working Max — TrainHeroic turns them into the exact weight for you. ${missing.length?`${list(missing)} ${missing.length>1?'sessions are':'session is'} in the app too. `:''}${fri?'Friday is the same for everyone: make up a lift you missed, or hit the tri-sets if you\'re up to date. ':''}New program every month.</p></div>`;
     }
   }
 
@@ -665,6 +724,16 @@ function pdfClone(){
     if(!parts.length) return;
     b.insertBefore(wrap,parts[0]); parts.forEach(p=>wrap.appendChild(p));
   });
+  // program cards: CSS grid + html2pdf's page-break pushing don't mix (one cell gets pushed, its row-mate
+  // gets sliced), so in print the grid becomes explicit two-card rows that move as a unit
+  const grid=clone.querySelector('.pgrid');
+  if(grid){
+    const cards=[...grid.children]; grid.innerHTML=''; grid.classList.add('prows');
+    const rowOf=(...c)=>{ const row=document.createElement('div'); row.className='prow'; row.append(...c); grid.appendChild(row); };
+    const lifts=cards.filter(c=>!c.classList.contains('flex')), flex=cards.filter(c=>c.classList.contains('flex'));
+    for(let i=0;i<lifts.length;i+=2) rowOf(...lifts.slice(i,i+2));
+    flex.forEach(c=>rowOf(c)); // Friday always gets its own full-width row
+  }
   // the two TrainHeroic screenshots become one side-by-side row that never splits across pages
   const shots=[...clone.querySelectorAll('.shotwrap')];
   if(shots.length){ const row=document.createElement('div'); row.className='shots'; shots[0].before(row); shots.forEach(s=>row.appendChild(s)); }
@@ -701,7 +770,7 @@ function planPdf(){
     image:{type:'jpeg',quality:0.88},
     html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy'],avoid:['.bhead','.intro-offer','.quoteblock','.coach-strip','.pcard','.week','.tl','.nums','.inc','.steps','.shots','.mod-row','.why','.quote','.pdf-cta']}
+    pagebreak:{mode:['css','legacy'],avoid:['.bhead','.intro-offer','.quoteblock','.coach-strip','.prow','.week','.tl','.nums','.inc','.steps','.shots','.mod-row','.why','.quote','.pdf-cta']}
   }).from(clone);
   const done=()=>{ ov.style.display='none'; };
   const wrap=p=>{ p.then(done,done); return p; };
