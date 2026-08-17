@@ -759,7 +759,11 @@ function pdfClone(){
   clone.appendChild(foot);
   return clone; // detached — html2pdf clones it again into its own A4-wide (210mm) container
 }
-function planPdf(){
+// iOS Safari caps a canvas at ~16.7M pixels; an 8-page A4 render at 2x is ~26M and silently fails,
+// so phones render at 1.4x (still crisp) and submitPlan() retries at 1x if a build throws.
+const IS_MOBILE=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||navigator.maxTouchPoints>1;
+function planPdf(scale){
+  scale=scale||(IS_MOBILE?1.4:2);
   const clone=pdfClone();
   const ov=document.getElementById('loadov');
   document.getElementById('loadmsg').textContent='Building your PDF…'; ov.style.display='flex';
@@ -768,7 +772,7 @@ function planPdf(){
     enableLinks:true, // the booking pill and tracker link stay clickable in the PDF
     filename:`RTB-Gameplan-${(window.__RTB.first||'member').replace(/\W/g,'')}.pdf`,
     image:{type:'jpeg',quality:0.88},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+    html2canvas:{scale:scale,useCORS:true,backgroundColor:'#ffffff'},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
     pagebreak:{mode:['css','legacy'],avoid:['.bhead','.intro-offer','.quoteblock','.coach-strip','.prow','.week','.tl','.nums','.inc','.steps','.shots','.mod-row','.why','.quote','.pdf-cta']}
   }).from(clone);
@@ -843,7 +847,9 @@ async function submitPlan(){
   err.style.display='none';
   btn.disabled=true; btn.textContent='Sending…';
   try{
-    const pdfB64=(await planPdf().outputPdf('datauristring')).split(',')[1]||'';
+    let pdfB64='';
+    try{ pdfB64=(await planPdf().outputPdf('datauristring')).split(',')[1]||''; }
+    catch(e){ console.warn('PDF build failed, retrying at 1x',e); pdfB64=(await planPdf(1).outputPdf('datauristring')).split(',')[1]||''; }
     if(!pdfB64) throw new Error('PDF build produced nothing');
 
     const d=window.__RTB;
