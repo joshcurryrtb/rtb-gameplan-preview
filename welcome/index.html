@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RTB Onboarding — Door A (Already Purchased)</title>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-        integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc"
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk"
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -75,6 +78,8 @@
   .ps-ex small { display:block; font-size:12.5px; font-weight:600; color:#555; margin-top:1px; }
 
   /* ---------- PDF layout: A4 at 96dpi (794px), everything scaled up for print legibility ---------- */
+  /* the print clone is mounted here (at 0,0, hidden under the opaque loading overlay) while its blocks are rendered */
+  #pdfhost { position:absolute; left:0; top:0; width:794px; background:#fff; z-index:98; }
   .doc.pdf { width:794px; border:none; box-shadow:none; padding:0 0 30px; font-size:16px; }
   .doc.pdf .doc-head { margin:0 0 26px; padding:22px 44px; }
   .doc.pdf .doc-head .logo-img { height:40px; }
@@ -705,7 +710,9 @@ function build(){
 
 // ---------- PDF + submit ----------
 // The PDF is NOT the on-screen doc shrunk onto A4 — it's a clone re-laid-out at A4 width (794px)
-// with the .pdf stylesheet (bigger type, wider margins, page-break rules), rendered off-screen.
+// with the .pdf stylesheet (bigger type, wider margins), then assembled BLOCK BY BLOCK: each block is
+// its own small html2canvas render placed onto jsPDF pages by our own paginator. One giant canvas
+// of the whole document blows past iOS Safari's canvas limit and comes out blank on phones.
 function pdfClone(){
   const d=window.__RTB;
   const clone=document.getElementById('doc').cloneNode(true);
@@ -714,8 +721,8 @@ function pdfClone(){
   const head=clone.querySelector('.doc-head');
   const t=document.createElement('h1'); t.className='anton pdf-title'; t.textContent=`${d.first}'s Gameplan.`;
   head.insertAdjacentElement('afterend',t);
-  // Keep each block's number + title + first piece of content together, but let the rest of the
-  // block flow across pages — avoiding breaks inside whole blocks left half-empty pages.
+  // Keep each block's number + title + first piece of content together as one unit;
+  // the rest of the block's children paginate individually.
   clone.querySelectorAll('.doc-block').forEach(b=>{
     const wrap=document.createElement('div'); wrap.className='bhead';
     const parts=[b.querySelector('.bnum'),b.querySelector('.bt')].filter(Boolean);
@@ -724,17 +731,16 @@ function pdfClone(){
     if(!parts.length) return;
     b.insertBefore(wrap,parts[0]); parts.forEach(p=>wrap.appendChild(p));
   });
-  // program cards: CSS grid + html2pdf's page-break pushing don't mix (one cell gets pushed, its row-mate
-  // gets sliced), so in print the grid becomes explicit two-card rows that move as a unit
+  // program cards → explicit two-card rows (each row is one paginated unit); Friday gets its own row
   const grid=clone.querySelector('.pgrid');
   if(grid){
     const cards=[...grid.children]; grid.innerHTML=''; grid.classList.add('prows');
     const rowOf=(...c)=>{ const row=document.createElement('div'); row.className='prow'; row.append(...c); grid.appendChild(row); };
     const lifts=cards.filter(c=>!c.classList.contains('flex')), flex=cards.filter(c=>c.classList.contains('flex'));
     for(let i=0;i<lifts.length;i+=2) rowOf(...lifts.slice(i,i+2));
-    flex.forEach(c=>rowOf(c)); // Friday always gets its own full-width row
+    flex.forEach(c=>rowOf(c));
   }
-  // the two TrainHeroic screenshots become one side-by-side row that never splits across pages
+  // the two TrainHeroic screenshots become one side-by-side row
   const shots=[...clone.querySelectorAll('.shotwrap')];
   if(shots.length){ const row=document.createElement('div'); row.className='shots'; shots[0].before(row); shots.forEach(s=>row.appendChild(s)); }
   // On screen the booking CTA lives outside the doc; the PDF is read later, so it needs its own.
@@ -757,30 +763,71 @@ function pdfClone(){
   const foot=document.createElement('div'); foot.className='pdf-foot';
   foot.innerHTML=`<span>RTB ${d.location} · 21-Day Strength Reset</span><span>rtbgym.com.au · © 2026</span>`;
   clone.appendChild(foot);
-  return clone; // detached — html2pdf clones it again into its own A4-wide (210mm) container
+  return clone;
 }
-// iOS Safari caps a canvas at ~16.7M pixels; an 8-page A4 render at 2x is ~26M and silently fails,
-// so phones render at 1.4x (still crisp) and submitPlan() retries at 1x if a build throws.
+
+// The paginated units. Top-level children of the doc are units, except .doc-block whose children are
+// the units (and inside a .doc-block, the program grid's rows are the units).
+function pdfAtoms(clone){
+  const atoms=[];
+  [...clone.children].forEach(el=>{
+    if(el.classList.contains('doc-block')){
+      [...el.children].forEach(c=>{ if(c.classList.contains('pgrid')) atoms.push(...c.children); else atoms.push(c); });
+    } else atoms.push(el);
+  });
+  return atoms;
+}
+
 const IS_MOBILE=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||navigator.maxTouchPoints>1;
-function planPdf(scale){
-  scale=scale||(IS_MOBILE?1.4:2);
+const PDF_W=794, PDF_H=1123, PDF_TOP=38, PDF_BOTTOM=45;   // A4 @ 96dpi, margins in px (≈10mm / 12mm)
+
+async function buildPdf(scale){
+  scale=scale||(IS_MOBILE?1.6:2);
   const clone=pdfClone();
-  const ov=document.getElementById('loadov');
-  document.getElementById('loadmsg').textContent='Building your PDF…'; ov.style.display='flex';
-  const w=html2pdf().set({
-    margin:[10,0,12,0],
-    enableLinks:true, // the booking pill and tracker link stay clickable in the PDF
-    filename:`RTB-Gameplan-${(window.__RTB.first||'member').replace(/\W/g,'')}.pdf`,
-    image:{type:'jpeg',quality:0.88},
-    html2canvas:{scale:scale,useCORS:true,backgroundColor:'#ffffff'},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy'],avoid:['.bhead','.intro-offer','.quoteblock','.coach-strip','.prow','.week','.tl','.nums','.inc','.steps','.shots','.mod-row','.why','.quote','.pdf-cta']}
-  }).from(clone);
-  const done=()=>{ ov.style.display='none'; };
-  const wrap=p=>{ p.then(done,done); return p; };
+  let host=document.getElementById('pdfhost');
+  if(!host){ host=document.createElement('div'); host.id='pdfhost'; document.body.appendChild(host); }
+  host.innerHTML=''; host.appendChild(clone);
+  const ov=document.getElementById('loadov'), msg=document.getElementById('loadmsg');
+  msg.textContent='Building your PDF…'; ov.style.display='flex';
+  const y0=window.scrollY; window.scrollTo(0,0);
+  try{
+    if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+    await new Promise(r=>setTimeout(r,60));
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:'px',format:[PDF_W,PDF_H],orientation:'portrait',hotfixes:['px_scaling'],compress:true});
+    const cRect=clone.getBoundingClientRect();
+    const atoms=pdfAtoms(clone).map(el=>{ const r=el.getBoundingClientRect(); return {el, top:r.top-cRect.top, bottom:r.bottom-cRect.top}; }).filter(a=>a.bottom-a.top>=1);
+    // Paginate on atom boundaries (an atom never splits), then render each page as ONE cropped region
+    // of the clone — small canvases (phone-safe), few html2canvas calls (fast).
+    const avail=PDF_H-PDF_TOP-PDF_BOTTOM;
+    const pages=[]; let cur=null;
+    atoms.forEach(a=>{
+      if(cur && a.bottom-cur.start<=avail){ cur.end=a.bottom; cur.atoms.push(a); }
+      else { cur={start:a.top,end:a.bottom,atoms:[a]}; pages.push(cur); }
+    });
+    for(let i=0;i<pages.length;i++){
+      const pg=pages[i]; const h=pg.end-pg.start;
+      if(i>0) pdf.addPage();
+      msg.textContent=`Building your PDF… page ${i+1} of ${pages.length}`;
+      const canvas=await html2canvas(clone,{scale,useCORS:true,backgroundColor:'#ffffff',logging:false,
+        x:cRect.left, y:cRect.top+pg.start, width:PDF_W, height:h, scrollX:0, scrollY:0});
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.88),'JPEG',0,PDF_TOP,PDF_W,h,undefined,'FAST');
+      pg.atoms.forEach(a=>a.el.querySelectorAll('a[href]').forEach(l=>{
+        const ar=l.getBoundingClientRect();
+        pdf.link(ar.left-cRect.left, PDF_TOP+(ar.top-cRect.top-pg.start), ar.width, ar.height, {url:l.href});
+      }));
+    }
+    return pdf;
+  } finally {
+    host.innerHTML=''; ov.style.display='none'; window.scrollTo(0,y0);
+  }
+}
+const pdfName=()=>`RTB-Gameplan-${(window.__RTB.first||'member').replace(/\W/g,'')}.pdf`;
+function planPdf(scale){
+  const p=buildPdf(scale);
   return {
-    outputPdf:(...a)=>wrap(w.outputPdf(...a)),
-    save:(...a)=>wrap(w.save(...a))
+    outputPdf:async()=>(await p).output('datauristring',{filename:pdfName()}),
+    save:async()=>(await p).save(pdfName())
   };
 }
 function downloadPlan(){ planPdf().save(); }
