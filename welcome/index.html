@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RTB Onboarding — Door A (Already Purchased)</title>
+<title>Your RTB Gameplan Starts Here</title>
+<meta name="description" content="Answer a few quick questions and you're in — let's build your personal 21-Day Strength Reset gameplan: training days, focus lifts, calorie targets and this month's program.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="RTB Gym">
+<meta property="og:title" content="Your RTB Gameplan Starts Here">
+<meta property="og:description" content="Answer a few quick questions and you're in — let's build your personal 21-Day Strength Reset gameplan: training days, focus lifts, calorie targets and this month's program.">
+<meta property="og:image" content="https://gameplan.rtbgym.com.au/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Your RTB Gameplan Starts Here">
+<meta name="twitter:image" content="https://gameplan.rtbgym.com.au/og.png">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
         integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H"
@@ -198,6 +208,7 @@
   .num-box .nv { color:#444; font-size:11.5px; margin-top:4px; }
   .inc { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   @media (max-width:520px){ .inc { grid-template-columns:1fr; } }
+  .doc.pdf .inc { grid-template-columns:1fr 1fr !important; }  /* print layout must never depend on the viewport */
   .inc-item { border:1px solid #bbb; background:#f7f7f7; padding:12px 14px; font-size:13.5px; font-weight:600; }
   .inc-item span { display:block; color:#777; font-weight:400; font-size:12.5px; margin-top:3px; line-height:1.4; }
   .coach-strip { display:flex; align-items:center; gap:14px; border-top:1px solid #000; padding:18px 0 4px; }
@@ -795,13 +806,23 @@ async function buildPdf(scale){
     await new Promise(r=>setTimeout(r,60));
     const {jsPDF}=window.jspdf;
     const pdf=new jsPDF({unit:'px',format:[PDF_W,PDF_H],orientation:'portrait',hotfixes:['px_scaling'],compress:true});
-    const cRect=clone.getBoundingClientRect();
-    const atoms=pdfAtoms(clone).map(el=>{ const r=el.getBoundingClientRect(); return {el, top:r.top-cRect.top, bottom:r.bottom-cRect.top}; }).filter(a=>a.bottom-a.top>=1);
-    // Paginate on atom boundaries (an atom never splits), then render each page as ONE cropped region
-    // of the clone — small canvases (phone-safe), few html2canvas calls (fast).
+    // Measure inside html2canvas's own rendering frame (a probe render with onclone), because that is the
+    // geometry the page crops are taken from — on real iOS Safari the frame lays out differently to the live
+    // page, and paginating from live measurements sliced blocks across pages.
+    let geom=null;
+    await html2canvas(clone,{scale:0.05,width:20,height:20,x:0,y:0,logging:false,onclone:(doc)=>{
+      const c=doc.getElementById('doc-pdf'); const cr=c.getBoundingClientRect();
+      geom={left:cr.left, top:cr.top, atoms:pdfAtoms(c).map(el=>{ const r=el.getBoundingClientRect(); return {
+        top:r.top-cr.top, bottom:r.bottom-cr.top,
+        links:[...el.querySelectorAll('a[href]')].map(a=>{ const ar=a.getBoundingClientRect(); return {x:ar.left-cr.left, y:ar.top-cr.top, w:ar.width, h:ar.height, url:a.href}; })
+      };}).filter(a=>a.bottom-a.top>=1)};
+    }});
+    if(!geom) throw new Error('PDF probe failed');
+    // Paginate on block boundaries (a block never splits), then render each page as ONE cropped region —
+    // small canvases (phone-safe), few html2canvas calls (fast).
     const avail=PDF_H-PDF_TOP-PDF_BOTTOM;
     const pages=[]; let cur=null;
-    atoms.forEach(a=>{
+    geom.atoms.forEach(a=>{
       if(cur && a.bottom-cur.start<=avail){ cur.end=a.bottom; cur.atoms.push(a); }
       else { cur={start:a.top,end:a.bottom,atoms:[a]}; pages.push(cur); }
     });
@@ -810,12 +831,9 @@ async function buildPdf(scale){
       if(i>0) pdf.addPage();
       msg.textContent=`Building your PDF… page ${i+1} of ${pages.length}`;
       const canvas=await html2canvas(clone,{scale,useCORS:true,backgroundColor:'#ffffff',logging:false,
-        x:cRect.left, y:cRect.top+pg.start, width:PDF_W, height:h, scrollX:0, scrollY:0});
+        x:geom.left, y:geom.top+pg.start, width:PDF_W, height:h, scrollX:0, scrollY:0});
       pdf.addImage(canvas.toDataURL('image/jpeg',0.88),'JPEG',0,PDF_TOP,PDF_W,h,undefined,'FAST');
-      pg.atoms.forEach(a=>a.el.querySelectorAll('a[href]').forEach(l=>{
-        const ar=l.getBoundingClientRect();
-        pdf.link(ar.left-cRect.left, PDF_TOP+(ar.top-cRect.top-pg.start), ar.width, ar.height, {url:l.href});
-      }));
+      pg.atoms.forEach(a=>a.links.forEach(l=>pdf.link(l.x, PDF_TOP+(l.y-pg.start), l.w, l.h, {url:l.url})));
     }
     return pdf;
   } finally {
