@@ -51,6 +51,94 @@
   .doc { background:#fff; border:1.5px solid #000; padding:28px 26px 24px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
   .doc-head { display:flex; align-items:center; justify-content:space-between; background:#0d0d0d; margin:-28px -26px 22px; padding:13px 26px; }
   .doc-head .logo { font-size:19px; color:#fff; }
+  .logo-img { height:30px; display:block; }
+  .page-head .logo-img { height:34px; }
+  .doc-head .logo-img { height:24px; mix-blend-mode:screen; }
+
+  /* program cards */
+  .pgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:10px; margin-top:4px; }
+  .pcard { border:1.5px solid #000; background:#fff; padding:0 0 10px; break-inside:avoid; }
+  .pcard.rec { box-shadow:0 0 0 2px #000; }
+  .pc-head { display:flex; align-items:baseline; gap:8px; background:#0d0d0d; color:#fff; padding:10px 12px; margin-bottom:8px; }
+  .pc-day { font-family:'Anton',sans-serif; text-transform:uppercase; font-size:16px; letter-spacing:.5px; }
+  .pc-lift { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#aaa; }
+  .pc-you { margin-left:auto; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:1px; background:#fff; color:#000; padding:2px 7px; }
+  .ps-h { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#888; padding:6px 12px 2px; }
+  .ps-row { display:flex; gap:9px; align-items:flex-start; padding:4px 12px; }
+  .ps-tag { flex-shrink:0; width:26px; height:26px; border:1.5px solid #000; border-radius:50%; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .ps-ex { font-size:13.5px; font-weight:600; line-height:1.3; }
+  .ps-ex small { display:block; font-size:12.5px; font-weight:600; color:#555; margin-top:1px; }
+
+  /* ---------- PDF layout: A4 at 96dpi (794px), everything scaled up for print legibility ---------- */
+  .doc.pdf { width:794px; border:none; box-shadow:none; padding:0 0 30px; font-size:16px; }
+  .doc.pdf .doc-head { margin:0 0 26px; padding:22px 44px; }
+  .doc.pdf .doc-head .logo-img { height:40px; }
+  .doc.pdf .doc-head .dt { font-size:13px; letter-spacing:2px; }
+  .doc.pdf > .meta, .doc.pdf > .goalbar, .doc.pdf > .quoteblock, .doc.pdf > .intro-offer, .doc.pdf > .doc-block, .doc.pdf > .coach-strip { margin-left:44px; margin-right:44px; }
+  .doc.pdf .pdf-title { margin:0 44px 8px; font-size:40px; line-height:1.05; }
+  .doc.pdf .meta { font-size:15px; margin:0 44px 18px; }
+  .doc.pdf .goalbar { font-size:14px; padding:14px 18px; margin-bottom:26px; }
+  .doc.pdf .quoteblock { padding:20px 22px; margin-bottom:26px; }
+  .doc.pdf .quoteblock .qt { font-size:21px; }
+  .doc.pdf .quoteblock p { font-size:15px; }
+  .doc.pdf .intro-offer { padding:24px; margin-bottom:26px; }
+  .doc.pdf .intro-offer h4 { font-size:26px; }
+  .doc.pdf .intro-offer p { font-size:16px; line-height:1.6; }
+  .doc.pdf .intro-offer .tag { font-size:12px; }
+  /* the block's rule line lives on .bhead (not the block) so it travels with the heading across page breaks,
+     and sits 8px inside the element so html2pdf's 1–2px page-slice overshoot never leaves a stray line behind */
+  .doc.pdf .doc-block { border-top:none; padding:0 0 28px; }
+  .doc.pdf .bhead { break-inside:avoid; page-break-inside:avoid; padding-top:8px; }
+  .doc.pdf .bhead::before { content:''; display:block; border-top:1px solid #000; margin-bottom:24px; }
+  .doc.pdf .doc-block .bnum { font-size:28px; }
+  .doc.pdf .doc-block .bt { font-size:26px; margin-bottom:16px; }
+  .doc.pdf .why { font-size:16px; line-height:1.65; margin-top:16px; }
+  .doc.pdf .week { gap:7px; }
+  .doc.pdf .day { padding:14px 2px 12px; }
+  .doc.pdf .day .d { font-size:12px; }
+  .doc.pdf .day .l { font-size:15px; margin-top:6px; }
+  .doc.pdf .tl-row { padding:15px 18px; gap:18px; }
+  .doc.pdf .tl-row .wk { font-size:21px; width:90px; }
+  .doc.pdf .tl-row p { font-size:16px; line-height:1.55; }
+  .doc.pdf .step-row .sn { font-size:19px; width:26px; }
+  .doc.pdf .step-row p { font-size:16px; line-height:1.55; }
+  /* the two TrainHeroic screenshots sit side by side in print — stacked they each ate a page */
+  .doc.pdf .shotwrap { display:inline-block; width:47%; vertical-align:top; margin:20px 1% 4px; }
+  .doc.pdf .shot { width:100%; max-width:230px; }
+  .doc.pdf .shotcap { font-size:13.5px; max-width:300px; }
+  .doc.pdf .pdf-cta { padding-top:8px; margin:10px 44px 0; text-align:center; }
+  .doc.pdf .pdf-cta .box { border:2.5px solid #000; padding:26px 28px; }
+  .doc.pdf .pdf-cta .tag { display:inline-block; background:#000; color:#fff; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; padding:6px 12px; margin-bottom:12px; }
+  .doc.pdf .pdf-cta h4 { font-family:'Anton',sans-serif; text-transform:uppercase; font-size:30px; margin-bottom:10px; }
+  .doc.pdf .pdf-cta p { color:#555; font-size:16px; line-height:1.6; margin-bottom:8px; }
+  .doc.pdf .pdf-cta .price { font-size:34px; }
+  .doc.pdf .pdf-cta .pill { font-size:15px; padding:16px 30px; }
+  .doc.pdf .pdf-cta .url { font-size:13px; color:#888; margin-top:12px; word-break:break-all; }
+  .doc.pdf .quote { font-size:15.5px; padding:14px 18px; }
+  .doc.pdf .mod-row { font-size:16px; line-height:1.55; margin-bottom:12px; }
+  .doc.pdf .mod-row .flag { font-size:12px; }
+  .doc.pdf .nums { gap:12px; }
+  .doc.pdf .num-box { padding:18px 8px 16px !important; }
+  .doc.pdf .num-box .nl { font-size:21px; }
+  .doc.pdf .num-box .nv { font-size:13.5px !important; }
+  .doc.pdf .num-box .cal { font-size:32px; }
+  .doc.pdf .rec-tag { font-size:10.5px; }
+  .doc.pdf .inc { gap:12px; }
+  .doc.pdf .inc-item { font-size:16px; padding:15px 17px; }
+  .doc.pdf .inc-item span { font-size:14.5px; }
+  .doc.pdf .coach-strip { padding:24px 0 8px; gap:18px; }
+  .doc.pdf .coach-strip .avatar { width:56px; height:56px; font-size:24px; }
+  .doc.pdf .coach-strip .cn { font-size:21px; }
+  .doc.pdf .coach-strip p { font-size:15px; }
+  .doc.pdf .pgrid { gap:14px; }
+  .doc.pdf .pc-day { font-size:19px; }
+  .doc.pdf .pc-lift { font-size:12px; }
+  .doc.pdf .ps-h { font-size:11px; padding:8px 14px 3px; }
+  .doc.pdf .ps-row { padding:5px 14px; }
+  .doc.pdf .ps-tag { width:30px; height:30px; font-size:12px; }
+  .doc.pdf .ps-ex { font-size:15.5px; }
+  .doc.pdf .ps-ex small { font-size:14px; }
+  .doc.pdf .pdf-foot { display:flex; justify-content:space-between; margin:30px 44px 0; padding-top:14px; border-top:1px solid #000; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#888; font-weight:600; }
   .doc-head .dt { font-size:11.5px; color:#888; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
   .doc .meta { color:#6b6b6b; font-size:13.5px; margin:10px 0 20px; }
   .goalbar { background:#000; color:#fff; padding:12px 16px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:12.5px; margin-bottom:22px; line-height:1.5; }
@@ -133,7 +221,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="page-head"><div class="logo">RTB</div><div class="doorlab" id="doorlab"></div></div>
+  <div class="page-head"><img class="logo-img" id="pagelogo" alt="RTB"><div class="doorlab" id="doorlab"></div></div>
 
   <div id="hero"></div>
 
@@ -203,6 +291,35 @@ const TH2='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAkACQAAD/4QD2RXhpZgAATU0AKg
 // Mon–Thu are the programmed lift days. Friday is the catch-up / flex day — never auto-recommended,
 // always shown as an optional extra where the member picks the lift they missed or want again.
 const SCHEDULE=[['MON','Bench'],['TUE','Deadlift'],['WED','Incline Bench'],['THU','Squat']];
+// This month's program — transcribed from Josh's TrainHeroic screenshots and rendered as session cards
+// (a designed card reads far better in the PDF than a phone screenshot). Two tracks: female / male.
+// Each day = array of sections {h:'WARM UP', ex:[[tag, exercise, prescription], ...]}.
+// A track with no days is skipped; if the member's gender has no track, the other track is shown.
+const PROGRAM={
+  title:'August 2026 — Cluster Month',
+  intro:'August is built around <b>cluster sets</b> — short bursts of heavy, crisp reps with mini-rests in between, so you lift more total weight with better form. Every session below is written and waiting for you in TrainHeroic.',
+  female:{
+    MON:[
+      {h:'Warm up',        ex:[['A','Bench Press','8, 5, 3 @ –, 50, 60%']]},
+      {h:'Cluster sets',   ex:[['B','Bench Press','4 × 3 @ 75%']]},
+      {h:'Strength / power',ex:[['C','Front Squat','3 × 7 @ 80%']]},
+      {h:'Strength / power',ex:[['D1','Bulgarian Split Squat','2 × 7 @ 80%'],['D2','Seated Cable Row','2 × 10 @ 80%'],['D3','Side Plank + Hip Abduction','2 × 45 s']]}
+    ]
+  },
+  male:{
+    MON:[
+      {h:'Warm up',        ex:[['A','Bench Press','8, 5, 3 @ –, 65, 75%']]},
+      {h:'Cluster sets',   ex:[['B','Bench Press','4 × 3 @ 85%']]},
+      {h:'Strength / power',ex:[['C','Front Squat','3 × 7 @ 80%']]},
+      {h:'Strength / power',ex:[['D1','1-Arm DB Row','2 × 7 @ 80%'],['D2','Lying Leg Curl','2 × 10 @ 75%'],['D3','Tricep Pushdown','2 × 15 @ 65%']]}
+    ]
+  }
+};
+// Real logo — white for dark bars, black for the light page header.
+const LOGO_W=document.querySelector('#loadov img').getAttribute('src');
+const LOGO_B='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAACyCAYAAAANtLsHAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABpKADAAQAAAABAAAAsgAAAAAhlkxFAAAhWklEQVR4Ae2dCbRdRZWG0agIYQiTYUoiYVAgAioYJkkQCCgKyLigAWVoW0FRVFCXCipNtwpti7KUVltw7FYGAZmUISEgoAiCBAggGVHIIEIAmen+fvKOXo4v7933bt1zap/777X+3Om8ql1f1am5TpZbzmYCJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJmACJlANgZdVE01XYlmeUEd0JeTmBvp/JO2FkvTdQPYqfnwlGuy6gcLwb3kRUBl4qh+XlNevQM7rfuBk+JXqb+WVpDzV6/N973mJZyp8EU0N0QloIlIG2AYn8ASXPIYeQvPRXHQ/Woie7VO5IhLn96I9kaz8+9Jv/W8kAqrEZqETkfK91Y7gwyTkfG6lkvd71X8PoweR7uvZSPm7BCl/n0NhLGqDtCOEP4M0SrINj4AqnQVoBpqKrkb3ITVaRUWlwn4+2hIdjlZCtvgEvkwSijwuUrMGbz6FxhVf+DUkgafxWg3TregyNB2p06kOqa0LBFYgzEuQKlQrHYPF8Pw+moxWRepJF6Ypu1PR48jMYzNQxfRGVLZ9+aKY9nEex87j1vy7g3z9GBqDNCVrS0xgH8JT764Vut+n46Hh/2loHGodQaswn4G09mDecRlMJf/UwWi1l/Phf5HztbkMfkX+7oE8ywGEVLYyAQmsb5zuM7gOztuj1mnRkXw+D2le2nkQj4FGQMehso3lC03fOk+bzeBR8lhrh6OQ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oc0OqWx/Aoo2F34+Pmt7fArTTsb9UKrpvxQ+OYzqCKgBmodmohuQOjv3IH2vMqZjALYSAd8sJSBD/KgGXY3RN9B2Q/zb3C5/FIc0l61zV53eLNoU8Bu0AYpiqiQmohmJHFZ5mIbUMNmaSUCbVR5HWo9diOaie9EspMZHn/W7ZgqeRp3eVwTRbPMIqbP81eNwbkcHoC+j8UiFNKKpc/JO9Hv0iw4TsBl/r6mq+zoMp6o/17TJdHRXwgi3ISylP2p5SIgiTFC6B9RwSCq/6qSoMdGr1n00vf1wnxbxugAtRvr+EaS8lvS3xStvbe0SUAbYOicgjtrs0M0da517OXgISoduJN2AnZg2NOgchaYBI5jSrZ6slMpWIiCdsFflZItDQPlVrHvJ66IMF98Vr8V1Rf4W18VJqT01ARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARMwARPoYQL/D/1iIn40sILyAAAAAElFTkSuQmCC';
+const LOGO_URL='https://joshcurryrtb.github.io/rtb-gameplan-preview/rtb-logo.png'; // hosted copy for email clients (Gmail blocks data: URIs)
+document.getElementById('pagelogo').src=LOGO_B;
 const FLEXDAY=['FRI','Catch-Up'];
 const LIFTMAP={'Bench':'Bench','Deadlift':'Deadlift','Squat':'Squat','Incline Bench':'Incline Bench'};
 const TIMES={'Windsor':['5:20 AM','6:00 AM','6:40 AM','7:30 AM','10:30 AM','4:40 PM','5:30 PM','6:20 PM'],
@@ -340,10 +457,31 @@ function build(){
     }
   }
 
-  // training days
+  // recommended training days
   blocks+=`<div class="doc-block"><div class="bnum">${B()}</div>
-    <div class="bt">${beginner?'After that — your training days':'Your training days'}</div>
-    <div class="week">${week}</div><p class="why">${why}</p>${flexWhy}</div>`;
+    <div class="bt">${beginner?'After that — your recommended training days':'Your recommended training days'}</div>
+    <div class="week">${week}</div><p class="why">${why}</p>
+    <p class="why"><b>These are recommendations, not rules.</b> The program is flexible — come whenever you're available. Every day is a full session in its own right, so you'll never waste a visit.</p>
+    ${flexWhy}</div>`;
+
+  // this month's program — session cards for the member's track
+  {
+    const g=pick('gender');
+    const has=t=>PROGRAM[t]&&Object.keys(PROGRAM[t]).length;
+    const track = (g==='Male'&&has('male'))?'male' : has('female')?'female' : has('male')?'male' : null;
+    if(track){
+      const days=PROGRAM[track];
+      const cards=SCHEDULE.filter(([d])=>days[d]).map(([d,l])=>{
+        const secs=days[d].map(s=>`<div class="ps-h">${s.h}</div>`+s.ex.map(([t,e,r])=>`<div class="ps-row"><span class="ps-tag">${t}</span><span class="ps-ex">${e}<small>${r}</small></span></div>`).join('')).join('');
+        return `<div class="pcard${rec.includes(d)?' rec':''}"><div class="pc-head"><span class="pc-day">${dayNames[d]}</span><span class="pc-lift">${l}</span>${rec.includes(d)?'<span class="pc-you">Your day</span>':''}</div>${secs}</div>`;
+      }).join('');
+      const missing=SCHEDULE.filter(([d])=>!days[d]).map(([d])=>dayNames[d]);
+      blocks+=`<div class="doc-block"><div class="bnum">${B()}</div><div class="bt">This month's program — ${PROGRAM.title}</div>
+        ${PROGRAM.intro?`<p class="why" style="margin-top:0;">${PROGRAM.intro}</p>`:''}
+        <div class="pgrid">${cards}</div>
+        <p class="why">Percentages are of <b>your</b> Working Max — TrainHeroic turns them into the exact weight for you. ${missing.length?`${list(missing)} ${missing.length>1?'sessions are':'session is'} in the app too.`:''} New program every month.</p></div>`;
+    }
+  }
 
   // how the program works
   blocks+=`<div class="doc-block"><div class="bnum">${B()}</div><div class="bt">How your program works</div>
@@ -478,7 +616,7 @@ function build(){
     <div class="kicker">Generated from your answers</div>
     <h1 class="anton" style="font-size:36px;margin-bottom:24px;">${first}'s Gameplan.</h1>
     <div class="doc" id="doc">
-      <div class="doc-head"><div class="logo">RTB</div><div class="dt">Personal Gameplan</div></div>
+      <div class="doc-head"><img class="logo-img" src="${LOGO_W}" alt="RTB"><div class="dt">Personal Gameplan</div></div>
       <div class="meta">21-Day Strength Reset · RTB ${loc} · ${sess} sessions/week</div>
       <div class="goalbar">Goal: ${goal}${lifts.length?' · Focus: '+lifts.join(', '):''}</div>
       ${blocks}
@@ -507,16 +645,70 @@ function build(){
 }
 
 // ---------- PDF + submit ----------
+// The PDF is NOT the on-screen doc shrunk onto A4 — it's a clone re-laid-out at A4 width (794px)
+// with the .pdf stylesheet (bigger type, wider margins, page-break rules), rendered off-screen.
+function pdfClone(){
+  const d=window.__RTB;
+  const clone=document.getElementById('doc').cloneNode(true);
+  clone.id='doc-pdf'; clone.classList.add('pdf');
+  // title sits inside the doc for print (on screen it's the page h1 above the card)
+  const head=clone.querySelector('.doc-head');
+  const t=document.createElement('h1'); t.className='anton pdf-title'; t.textContent=`${d.first}'s Gameplan.`;
+  head.insertAdjacentElement('afterend',t);
+  // Keep each block's number + title + first piece of content together, but let the rest of the
+  // block flow across pages — avoiding breaks inside whole blocks left half-empty pages.
+  clone.querySelectorAll('.doc-block').forEach(b=>{
+    const wrap=document.createElement('div'); wrap.className='bhead';
+    const parts=[b.querySelector('.bnum'),b.querySelector('.bt')].filter(Boolean);
+    const first=parts.length?parts[parts.length-1].nextElementSibling:null;
+    if(first) parts.push(first);
+    if(!parts.length) return;
+    b.insertBefore(wrap,parts[0]); parts.forEach(p=>wrap.appendChild(p));
+  });
+  // the two TrainHeroic screenshots become one side-by-side row that never splits across pages
+  const shots=[...clone.querySelectorAll('.shotwrap')];
+  if(shots.length){ const row=document.createElement('div'); row.className='shots'; shots[0].before(row); shots.forEach(s=>row.appendChild(s)); }
+  // On screen the booking CTA lives outside the doc; the PDF is read later, so it needs its own.
+  clone.querySelectorAll('.intro-offer p').forEach(p=>{ if(/lock the Intro in at the bottom/.test(p.textContent)) p.textContent='Your booking link is at the end of this document.'; });
+  let cta='';
+  if(d.beginner){
+    cta=`<div class="pdf-cta"><div class="box"><div class="tag">${d.door==='B'?'Final step':'Recommended next step'}</div>
+      <h4>${d.door==='B'?'Lock in your Intro Session.':'Book your Intro Session.'}</h4>
+      <p>${d.door==='B'?'The only thing between you and week one is your Intro session — the 1:1 where you learn the big three properly. Your 21 days start the moment it\'s booked.':'One 1:1 session to master the squat, bench and deadlift before your first class.'}</p>
+      <div class="price"><s>$100</s>$82.70</div>
+      <a class="pill" href="${LINK_INTRO}">Book my Intro Session →</a>
+      <div class="url">${LINK_INTRO}</div></div></div>`;
+  } else if(d.door==='B'){
+    cta=`<div class="pdf-cta"><div class="box"><div class="tag">Final step</div><h4>Lock in your spot.</h4>
+      <p>Your gameplan is built and your coach has a copy. All that's left is to claim your spot — then we'll see you on ${d.recommendedDays[0]}.</p>
+      <a class="pill" href="${LINK_TRIAL}">Start my 21-Day Strength Reset →</a>
+      <div class="url">${LINK_TRIAL}</div></div></div>`;
+  }
+  if(cta) clone.insertAdjacentHTML('beforeend',cta);
+  const foot=document.createElement('div'); foot.className='pdf-foot';
+  foot.innerHTML=`<span>RTB ${d.location} · 21-Day Strength Reset</span><span>rtbgym.com.au · © 2026</span>`;
+  clone.appendChild(foot);
+  return clone; // detached — html2pdf clones it again into its own A4-wide (210mm) container
+}
 function planPdf(){
-  const el=document.getElementById('doc');
-  return html2pdf().set({
-    margin:[8,8,8,8],
+  const clone=pdfClone();
+  const ov=document.getElementById('loadov');
+  document.getElementById('loadmsg').textContent='Building your PDF…'; ov.style.display='flex';
+  const w=html2pdf().set({
+    margin:[10,0,12,0],
+    enableLinks:true, // the booking pill and tracker link stay clickable in the PDF
     filename:`RTB-Gameplan-${(window.__RTB.first||'member').replace(/\W/g,'')}.pdf`,
-    image:{type:'jpeg',quality:0.85},
-    html2canvas:{scale:1.6,useCORS:true,backgroundColor:'#ffffff'}, // keeps the emailed PDF under ~1MB
+    image:{type:'jpeg',quality:0.88},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['css','avoid-all'],avoid:['.doc-block','.intro-offer','.num-box','.tl-row','.shotwrap','.inc-item','.coach-strip']}
-  }).from(el);
+    pagebreak:{mode:['css','legacy'],avoid:['.bhead','.intro-offer','.quoteblock','.coach-strip','.pcard','.week','.tl','.nums','.inc','.steps','.shots','.mod-row','.why','.quote','.pdf-cta']}
+  }).from(clone);
+  const done=()=>{ ov.style.display='none'; };
+  const wrap=p=>{ p.then(done,done); return p; };
+  return {
+    outputPdf:(...a)=>wrap(w.outputPdf(...a)),
+    save:(...a)=>wrap(w.save(...a))
+  };
 }
 function downloadPlan(){ planPdf().save(); }
 
@@ -531,9 +723,9 @@ function memberEmail(d){
         : `We've recommended an <b>Intro Session</b> before your first class — one 1:1 to master the big three.`)
     : `Your next step is simple: book your first class and turn up. Everything else is handled.`;
   return `<div style="${EM}max-width:560px;margin:0 auto;color:#111;">
-    <div style="background:#0d0d0d;color:#fff;padding:20px 24px;">
-      <div style="font-size:22px;font-weight:700;font-style:italic;letter-spacing:1px;">RTB</div>
-      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-top:4px;">Personal Gameplan</div>
+    <div style="background:#0d0d0d;color:#fff;padding:22px 24px 20px;">
+      <img src="${LOGO_URL}" alt="RTB" width="120" style="display:block;width:120px;height:auto;border:0;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-top:12px;">Personal Gameplan</div>
     </div>
     <div style="padding:24px;">
       <h1 style="${EM}font-size:26px;margin:0 0 14px;">${esc(d.first)}, here's your gameplan.</h1>
@@ -551,6 +743,7 @@ function coachEmail(d){
   const row=(k,v)=>v?`<tr><td style="padding:7px 12px 7px 0;color:#888;font-size:13px;white-space:nowrap;vertical-align:top;">${esc(k)}</td><td style="padding:7px 0;font-size:14px;color:#111;">${esc(v)}</td></tr>`:'';
   return `<div style="${EM}max-width:600px;margin:0 auto;color:#111;">
     <div style="background:#0d0d0d;color:#fff;padding:18px 22px;">
+      <img src="${LOGO_URL}" alt="RTB" width="90" style="display:block;width:90px;height:auto;border:0;margin-bottom:12px;">
       <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">New onboarding submission</div>
       <div style="font-size:21px;font-weight:700;margin-top:4px;">${esc(d.name)} &middot; RTB ${esc(d.location)}</div>
     </div>
