@@ -666,13 +666,13 @@ function build(){
     cta=`<div class="intro-offer final" style="text-align:center;">
       <div class="tag">Final step</div>
       <h4>Lock it in.</h4>
-      <p>Your gameplan is built and your coach has a copy. All that's left is to claim your spot — then we'll see you on ${dayNames[rec[0]]}.</p>
+      <p>Your gameplan is built and your coach has a copy. All that's left is to claim your spot — then book your first class and we'll see you there.</p>
       <a class="pill" href="${LINK_TRIAL}" target="_blank">Start my 21-Day Strength Reset →</a></div>`;
   }
   else {
     cta=`<div class="intro-offer final" style="text-align:center;">
       <div class="tag">You're all set</div>
-      <h4>See you ${dayNames[rec[0]]}.</h4>
+      <h4>See you at your first class.</h4>
       <p>Your gameplan is on its way to your inbox and your coach has a copy. Book your first class and turn up — we'll handle the rest.</p></div>`;
   }
 
@@ -766,7 +766,7 @@ function pdfClone(){
       <div class="url">${LINK_INTRO}</div></div></div>`;
   } else if(d.door==='B'){
     cta=`<div class="pdf-cta"><div class="box"><div class="tag">Final step</div><h4>Lock in your spot.</h4>
-      <p>Your gameplan is built and your coach has a copy. All that's left is to claim your spot — then we'll see you on ${d.recommendedDays[0]}.</p>
+      <p>Your gameplan is built and your coach has a copy. All that's left is to claim your spot — then book your first class and we'll see you there.</p>
       <a class="pill" href="${LINK_TRIAL}">Start my 21-Day Strength Reset →</a>
       <div class="url">${LINK_TRIAL}</div></div></div>`;
   }
